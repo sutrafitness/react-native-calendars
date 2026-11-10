@@ -19,9 +19,9 @@ export default function styleConstructor(theme: Theme = {}, calendarHeight: numb
     },
     contentStyle: {
       backgroundColor: appStyle.calendarBackground,
-      ...appStyle.contentStyle,
       flexDirection: 'row',
-      height: calendarHeight + 10
+      height: calendarHeight + 10,
+      ...appStyle.contentStyle
     },
     line: {
       height: 1,

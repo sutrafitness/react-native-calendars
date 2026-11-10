@@ -31,6 +31,8 @@ export interface TimelineProps {
    * The timeline day start time
    */
   start?: number;
+  /** Studio wall-clock date and time for the now indicator. */
+  nowIndicatorTime?: {date?: string; hour: number; minutes: number};
   /**
    * The timeline day end time
    */
@@ -115,6 +117,9 @@ export interface TimelineProps {
   timelineLeftInset?: number;
   /** Identifier for testing */
   testID?: string;
+  contentWidth?: number;
+  renderBackground?: () => React.ReactNode;
+  renderForeground?: () => React.ReactNode;
 }
 
 const Timeline = (props: TimelineProps) => {
@@ -142,7 +147,11 @@ const Timeline = (props: TimelineProps) => {
     eventTapped,
     numberOfDays = 1,
     timelineLeftInset = 0,
-    testID
+    testID,
+    nowIndicatorTime,
+    contentWidth,
+    renderBackground,
+    renderForeground
   } = props;
 
   const pageDates = useMemo(() => {
@@ -158,11 +167,17 @@ const Timeline = (props: TimelineProps) => {
   const calendarHeight = useRef((end - start) * HOUR_BLOCK_HEIGHT);
   const styles = useRef(styleConstructor(theme || props.styles, calendarHeight.current));
 
+  const prevThemeRef = useRef(theme);
+  if (prevThemeRef.current !== theme) {
+    prevThemeRef.current = theme;
+    styles.current = styleConstructor(theme || props.styles, calendarHeight.current);
+  }
+
   const {scrollEvents} = useTimelineOffset({onChangeOffset, scrollOffset, scrollViewRef: scrollView});
 
   const width = useMemo(() => {
-    return constants.screenWidth - timelineLeftInset;
-  }, [timelineLeftInset]);
+    return (contentWidth ?? constants.screenWidth) - timelineLeftInset;
+  }, [timelineLeftInset, contentWidth]);
 
   const packedEvents = useMemo(() => {
     return map(pageEvents, (_e, i) => {
@@ -226,19 +241,31 @@ const Timeline = (props: TimelineProps) => {
     });
 
     return (
-      <View pointerEvents={'box-none'}  style={[{marginLeft: dayIndex === 0 ? timelineLeftInset : undefined}, styles.current.eventsContainer]}>
+      <View
+        pointerEvents={'box-none'}
+        style={[{marginLeft: dayIndex === 0 ? timelineLeftInset : undefined}, styles.current.eventsContainer]}
+      >
         {events}
       </View>
     );
   };
 
   const renderTimelineDay = (dayIndex: number) => {
-    const indexOfToday = pageDates.indexOf(generateDay(new Date().toString()));
-    const left = timelineLeftInset + indexOfToday * width / numberOfDays;
+    const indexOfToday = pageDates.indexOf(nowIndicatorTime?.date ?? generateDay(new Date().toString()));
+    const left = timelineLeftInset + (indexOfToday * width) / numberOfDays;
     return (
       <React.Fragment key={dayIndex}>
         {renderEvents(dayIndex)}
-        {indexOfToday !== -1 && showNowIndicator && <NowIndicator width={width / numberOfDays} left={left} styles={styles.current}/>}
+        {indexOfToday !== -1 && showNowIndicator && (
+          <NowIndicator
+            width={width / numberOfDays}
+            left={left}
+            start={start}
+            hour={nowIndicatorTime?.hour}
+            minutes={nowIndicatorTime?.minutes}
+            styles={styles.current}
+          />
+        )}
       </React.Fragment>
     );
   };
@@ -248,7 +275,7 @@ const Timeline = (props: TimelineProps) => {
       // @ts-expect-error
       ref={scrollView}
       style={styles.current.container}
-      contentContainerStyle={[styles.current.contentStyle, {width: constants.screenWidth}]}
+      contentContainerStyle={[styles.current.contentStyle, {width: contentWidth ?? constants.screenWidth}]}
       showsVerticalScrollIndicator={false}
       {...scrollEvents}
       testID={testID}
@@ -268,7 +295,9 @@ const Timeline = (props: TimelineProps) => {
         timelineLeftInset={timelineLeftInset}
         testID={`${testID}.hours`}
       />
+      {renderBackground?.()}
       {times(numberOfDays, renderTimelineDay)}
+      {renderForeground?.()}
     </ScrollView>
   );
 };

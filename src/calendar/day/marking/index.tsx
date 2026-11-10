@@ -54,6 +54,8 @@ export interface MarkingProps extends DotProps {
   periods?: PERIOD[];
   startingDay?: boolean;
   endingDay?: boolean;
+  bleedLeft?: boolean;
+  bleedRight?: boolean;
   accessibilityLabel?: string;
   customStyles?: CustomStyle;
 }
@@ -104,7 +106,7 @@ const Marking = (props: MarkingProps) => {
     if (endingDay) {
       styles.push(style.current.endingDay);
     }
-    return <View key={index} style={styles}/>;
+    return <View key={index} style={styles} />;
   };
 
   const renderDot = (index?: number, item?: any) => {
@@ -119,7 +121,7 @@ const Marking = (props: MarkingProps) => {
       color = selected && item.selectedDotColor ? item.selectedDotColor : item.color;
     }
 
-    return <Dot {...dotProps} key={key} color={color}/>;
+    return <Dot {...dotProps} key={key} color={color} />;
   };
 
   return renderMarkingByType();

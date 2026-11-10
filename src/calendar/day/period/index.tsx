@@ -1,11 +1,19 @@
 import PropTypes from 'prop-types';
 import React, {useCallback, useRef, useMemo} from 'react';
-import {TouchableWithoutFeedback, TouchableOpacity, Text, View, ViewStyle, ViewProps, TextStyle, StyleProp} from 'react-native';
+import {
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+  Text,
+  View,
+  ViewStyle,
+  ViewProps,
+  TextStyle,
+  StyleProp
+} from 'react-native';
 import {xdateToData} from '../../../interface';
 import {Theme, DayState, DateData} from '../../../types';
 import Marking, {MarkingProps} from '../marking';
 import styleConstructor from './style';
-
 
 export interface PeriodDayProps extends ViewProps {
   theme?: Theme;
@@ -27,7 +35,9 @@ type MarkingStyle = {
   startingDay?: ViewStyle;
   endingDay?: ViewStyle;
   day?: ViewStyle;
-}
+};
+
+const WEEK_EDGE_BLEED = 15;
 
 const PeriodDay = (props: PeriodDayProps) => {
   const {
@@ -45,7 +55,7 @@ const PeriodDay = (props: PeriodDayProps) => {
   } = props;
   const dateData = date ? xdateToData(date) : undefined;
   const style = useRef(styleConstructor(theme));
-  
+
   const isDisabled = typeof marking?.disabled !== 'undefined' ? marking.disabled : state === 'disabled';
   const isInactive = typeof marking?.inactive !== 'undefined' ? marking.inactive : state === 'inactive';
   const isToday = typeof marking?.today !== 'undefined' ? marking.today : state === 'today';
@@ -77,7 +87,7 @@ const PeriodDay = (props: PeriodDayProps) => {
       } else if (marking.selected) {
         defaultStyle.textStyle = {color: style.current.selectedText.color};
       }
-  
+
       if (marking.startingDay) {
         defaultStyle.startingDay = {backgroundColor: marking.color};
       }
@@ -87,7 +97,7 @@ const PeriodDay = (props: PeriodDayProps) => {
       if (!marking.startingDay && !marking.endingDay) {
         defaultStyle.day = {backgroundColor: marking.color};
       }
-      
+
       if (marking.textColor) {
         defaultStyle.textStyle = {color: marking.textColor};
       }
@@ -97,7 +107,7 @@ const PeriodDay = (props: PeriodDayProps) => {
       if (marking.customContainerStyle) {
         defaultStyle.containerStyle = marking.customContainerStyle;
       }
-  
+
       return defaultStyle;
     }
   }, [marking]);
@@ -115,12 +125,12 @@ const PeriodDay = (props: PeriodDayProps) => {
         overflow: 'hidden',
         paddingTop: 5
       });
-      
+
       const start = markingStyle.startingDay;
       const end = markingStyle.endingDay;
       if (start && !end) {
         containerStyle.push({backgroundColor: markingStyle.startingDay?.backgroundColor});
-      } else if (end && !start || end && start) {
+      } else if ((end && !start) || (end && start)) {
         containerStyle.push({backgroundColor: markingStyle.endingDay?.backgroundColor});
       }
 
@@ -180,12 +190,19 @@ const PeriodDay = (props: PeriodDayProps) => {
     onLongPress?.(dateData);
   }, [onLongPress, date]);
 
+  const fillersBleedStyle = useMemo(() => {
+    return {
+      left: marking?.bleedLeft ? -WEEK_EDGE_BLEED : 0,
+      right: marking?.bleedRight ? -WEEK_EDGE_BLEED : 0
+    };
+  }, [marking]);
+
   const renderFillers = () => {
     if (marking) {
       return (
-        <View style={[style.current.fillers, fillerStyles.fillerStyle]}>
-          <View style={[style.current.leftFiller, fillerStyles.leftFillerStyle]}/>
-          <View style={[style.current.rightFiller, fillerStyles.rightFillerStyle]}/>
+        <View style={[style.current.fillers, fillerStyles.fillerStyle, fillersBleedStyle]}>
+          <View style={[style.current.leftFiller, fillerStyles.leftFillerStyle]} />
+          <View style={[style.current.rightFiller, fillerStyles.rightFillerStyle]} />
         </View>
       );
     }
@@ -216,7 +233,7 @@ const PeriodDay = (props: PeriodDayProps) => {
       </Text>
     );
   };
-    
+
   const Component = marking ? TouchableWithoutFeedback : TouchableOpacity;
 
   return (

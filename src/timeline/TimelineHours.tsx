@@ -2,10 +2,9 @@ import range from 'lodash/range';
 import times from 'lodash/times';
 
 import React, {useCallback, useMemo, useRef} from 'react';
-import {View, Text, TouchableWithoutFeedback, ViewStyle, TextStyle, StyleSheet} from 'react-native';
+import {StyleSheet, Text, TouchableWithoutFeedback, View, ViewStyle, TextStyle} from 'react-native';
 
-import constants from '../commons/constants';
-import {buildTimeString, calcTimeByPosition, calcDateByPosition} from './helpers/presenter';
+import {buildTimeString, calcDateByPosition, calcTimeByPosition} from './helpers/presenter';
 import {buildUnavailableHoursBlocks, HOUR_BLOCK_HEIGHT, UnavailableHours} from './Packer';
 
 interface NewEventTime {
@@ -29,9 +28,6 @@ export interface TimelineHoursProps {
   timelineLeftInset?: number;
   testID?: string;
 }
-
-const dimensionWidth = constants.screenWidth;
-const EVENT_DIFF = 20;
 
 const TimelineHours = (props: TimelineHoursProps) => {
   const {
@@ -62,13 +58,13 @@ const TimelineHours = (props: TimelineHoursProps) => {
       if (i === start) {
         timeText = '';
       } else if (i < 12) {
-        timeText = !format24h ? `${i} AM` : `${i}:00`;
+        timeText = !format24h ? `${i}AM` : `${i}:00`;
       } else if (i === 12) {
-        timeText = !format24h ? `${i} PM` : `${i}:00`;
+        timeText = !format24h ? `${i}PM` : `${i}:00`;
       } else if (i === 24) {
-        timeText = !format24h ? '12 AM' : '23:59';
+        timeText = !format24h ? '12AM' : '23:59';
       } else {
-        timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
+        timeText = !format24h ? `${i - 12}PM` : `${i}:00`;
       }
       return {timeText, time: i};
     });
@@ -100,7 +96,7 @@ const TimelineHours = (props: TimelineHoursProps) => {
   return (
     <>
       <TouchableWithoutFeedback onLongPress={handleBackgroundPress} onPressOut={handlePressOut}>
-        <View style={StyleSheet.absoluteFillObject}/>
+        <View style={StyleSheet.absoluteFillObject} />
       </TouchableWithoutFeedback>
       {unavailableHoursBlocks.map((block, index) => (
         <View
@@ -115,29 +111,60 @@ const TimelineHours = (props: TimelineHoursProps) => {
       ))}
 
       {hours.map(({timeText, time}, index) => {
+        const flatLineStyle = StyleSheet.flatten(styles.line) || {};
+        const lineColor = flatLineStyle.backgroundColor || '#D1D5DB';
+        const DOT_SIZE = 1;
+        const DOT_TOTAL_WIDTH = width;
+        const renderDashedLine = (topOffset: number, dashKey: string) => (
+          <View
+            key={dashKey}
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: topOffset,
+              left: timelineLeftInset,
+              width: DOT_TOTAL_WIDTH,
+              height: 0,
+              borderTopWidth: DOT_SIZE,
+              borderColor: lineColor,
+              borderStyle: 'dashed',
+              opacity: 0.25
+            }}
+          />
+        );
         return (
           <React.Fragment key={time}>
-            <Text key={`timeLabel${time}`} style={[styles.timeLabel, {top: offset * index - 6, width: timelineLeftInset - 16}]}>
+            <Text
+              key={`timeLabel${time}`}
+              style={[styles.timeLabel, {top: offset * index - 6, width: timelineLeftInset - 4}]}
+            >
               {timeText}
             </Text>
             {time === start ? null : (
               <View
                 key={`line${time}`}
                 testID={`${testID}.${time}.line`}
-                style={[styles.line, {top: offset * index, width: dimensionWidth - EVENT_DIFF, left: timelineLeftInset - 16}]}
+                style={[styles.line, {top: offset * index, width: width, left: timelineLeftInset}]}
               />
             )}
+            {time === end ? null : renderDashedLine(offset * (index + 0.25), `lineQuarter${time}`)}
             {
               <View
                 key={`lineHalf${time}`}
                 testID={`${testID}.${time}.lineHalf`}
-                style={[styles.line, {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF, left: timelineLeftInset - 16}]}
+                style={[
+                  styles.line,
+                  {top: offset * (index + 0.5), width: width, left: timelineLeftInset, opacity: 0.4}
+                ]}
               />
             }
+            {time === end ? null : renderDashedLine(offset * (index + 0.75), `lineThreeQuarter${time}`)}
           </React.Fragment>
         );
       })}
-      {times(numberOfDays, (index) => <View key={index} style={[styles.verticalLine, {right: (index + 1) * width / numberOfDays}]}/>)}
+      {times(numberOfDays, index => (
+        <View key={index} style={[styles.verticalLine, {right: ((index + 1) * width) / numberOfDays}]} />
+      ))}
     </>
   );
 };

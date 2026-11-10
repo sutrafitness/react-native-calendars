@@ -1,7 +1,7 @@
 {
   "name": "react-native-calendars",
-  "version": "1.22.0",
-  "main": "src/index.ts",
+  "version": "1.1314.0",
+  "main": "src/index.js",
   "types": "src/index.d.ts",
   "description": "React Native Calendar Components",
   "scripts": {
@@ -21,11 +21,12 @@
     "android": "react-native run-android",
     "xcode": "open ios/CalendarsExample.xcworkspace/",
     "clean": "rm yarn-lock && rm -rf ./node_modules && yarn",
-    "pod-install": "pod install --project-directory=ios"
+    "pod-install": "pod install --project-directory=ios",
+    "build:arketa": "tsc --project tsconfig.arketa.json"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wix/react-native-calendars"
+    "url": "git+https://github.com/sutrafitness/react-native-calendars.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
