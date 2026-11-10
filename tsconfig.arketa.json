@@ -1,5 +1,19 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "src/**/__tests__/**"]
+  "compilerOptions": {
+    "rootDir": "source",
+    "outDir": "src",
+    "paths": {
+      "react-native-calendars": [
+        "./source/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "source/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "source/**/__tests__/**"
+  ]
 }

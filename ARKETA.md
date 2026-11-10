@@ -13,7 +13,7 @@ This branch carries Business App's former
 - Wider timeline content, background/foreground render slots, reactive theme styles,
   and theme-controlled content height.
 
-Edit the TypeScript sources. Run `npm install --ignore-scripts --legacy-peer-deps`
+Edit the TypeScript sources under `source/`. Apps consume only generated `src/` JavaScript and declarations; keeping them separate prevents consumer compilers from resolving upstream TypeScript against their own React types. Run `npm install --ignore-scripts --legacy-peer-deps`
 and `npm run build:arketa`, then commit the generated JavaScript and declarations
 alongside the source changes. They are checked in so Git/archive consumers install
 without a compiler or development dependencies. The package keeps the upstream
